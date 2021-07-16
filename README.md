@@ -17,4 +17,11 @@ This trigger will be started by the RMF fleet adapter. *(yet to be implemented)*
 The Map Mux subscribes to several maps published by the multimap server depending on the number of levels you want it to support. the number of floors can be configured in yaml files that are stored in the config directory.
 
 
-
+### Future Improvements
+* Read directly from the map files instead of subscribing to the multiple maps published by the multimap server by robotnik
+    * Currently the method of subscribing to the multiple maps published by the multimap_server node is redundant.
+    * This package's dependency on the package will no longer be needed as the it will read direclty from the map files.
+* Support for lift_number
+    * MapRequest message will include a lift number.
+* Reinitialise robot's position on new level
+    * each lift number will be associated with a x,y and yaw value declared in the yaml file of which a initial pose estimate will be sent to the robot to "spawn" to its new location after arriving on the new level.
