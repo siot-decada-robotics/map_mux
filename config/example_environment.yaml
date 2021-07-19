@@ -1,12 +1,9 @@
-level_0:
-  global_frame: level_0_map
-  maps_package: multimap_server
+floor_0:
+  maps_package: map_mux
   maps:
-    localization: maps/floor_0/localization.yaml
-    routes: maps/floor_0/routes.yaml
-level_1:
-  global_frame: level_1_map
-  maps_package: multimap_server
+    path: maps/floor_0/routes.yaml
+floor_1:
+  maps_package: map_mux
   maps:
-    localization: maps/floor_1/localization.yaml
-    routes: maps/floor_1/routes.yaml
+    path: maps/floor_1/localization.yaml
+
