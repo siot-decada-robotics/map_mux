@@ -30,7 +30,7 @@ def main(argv = sys.argv):
     default_fleet_name = 'fleet_name'
     default_robot_name = 'robot_name'
     default_map_number = 1
-    default_level_name = "level_0"
+    default_level_name = "MBC_L9"
     default_topic_name = 'map_request'
     
 
@@ -61,7 +61,7 @@ def main(argv = sys.argv):
         rospy.loginfo("publishing map request")
         rospy.loginfo("fleet_name: "+ msg.fleet_name)
         rospy.loginfo("robot_name: "+ msg.robot_name)
-        rospy.loginfo("robot_name: "+ msg.level_name)
+        rospy.loginfo("level_name: "+ msg.level_name)
         rospy.loginfo("map_number: "+ str(msg.map_number))
         rospy.sleep(1)
         
