@@ -1,12 +1,12 @@
 level_0:
-  global_frame: level_0_map
+  global_frame: level_9_map
   maps_package: multimap_server
   maps:
-    localization: maps/floor_0/localization.yaml
-    routes: maps/floor_0/routes.yaml
+    localization: maps/L9/mbc_L9.yaml
+    routes: maps/L9/routes.yaml
 level_1:
-  global_frame: level_1_map
+  global_frame: level_10_map
   maps_package: multimap_server
   maps:
-    localization: maps/floor_1/localization.yaml
-    routes: maps/floor_1/routes.yaml
+    localization: maps/L10/mbc_L10.yaml
+    routes: maps/L10/routes.yaml

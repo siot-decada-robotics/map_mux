@@ -21,7 +21,7 @@ public:
       //negative so it will not equal to any map number
       current_map_number = -1;
 
-      yaml_file_path = "/home/kai/multi_map_ws/install/map_mux/share/map_mux/config/example_environment.yaml";
+      yaml_file_path = "/media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/map_mux/config/example_environment.yaml";
       if (node->getParam("map_file", map_file))
       { 
         yaml_file_path = map_file;
