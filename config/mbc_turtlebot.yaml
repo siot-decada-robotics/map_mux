@@ -1,9 +1,0 @@
-MBC_L9:
-  maps_package: map_mux
-  maps:
-    path: maps/L9/mbc_L9.yaml
-MBC_L10:
-  maps_package: map_mux
-  maps:
-    path: maps/L10/mbc_L10.yaml
-
