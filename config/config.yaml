@@ -1,0 +1,5 @@
+map_mux:
+  use_prefix: True
+maps:
+  L9: /media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/adhoc_simulations/maps/mbc_L9.yaml #set name of param to map name
+  L10: /media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/adhoc_simulations/maps/mbc_L10.yaml

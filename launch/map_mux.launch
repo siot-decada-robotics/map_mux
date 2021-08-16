@@ -2,6 +2,7 @@
 <launch>
 
 	<!-- Run the map mux-->
+	<rosparam file="$(find map_mux)/config/config.yaml" command="load" />
 	<node name="map_mux" pkg="map_mux" type="map_mux" output="screen"/> 
 	
 
