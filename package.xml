@@ -4,6 +4,8 @@
   <version>1.0.0</version>
   <description>A map multiplexer to switch between maps</description>
 
+  <author>Brian Gerkey, Tony Pratkanis</author>
+  <author>contradict@gmail.com</author>
   <author>Kai Wen Lum</author>
   <maintainer email="lkw303@gmail.com">Kai Wen</maintainer>
   <license>MIT</license>

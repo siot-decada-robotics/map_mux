@@ -1,8 +1,14 @@
 #include "ros/ros.h"
+#include "ros/package.h"
+#include "ros/console.h"
 #include "nav_msgs/MapMetaData.h"
 #include "nav_msgs/OccupancyGrid.h"
-
 #include "map_mux/MapRequest.h"
+#include "nav_msgs/GetMap.h"
+#include "nav_msgs/LoadMap.h"
+#include "map_server/image_loader.h"
+#include <std_srvs/Empty.h>
+
 #include "yaml-cpp/yaml.h"
 #include <vector>
 #include<iostream>
@@ -15,70 +21,85 @@ public:
       node = node_ptr;
     }
 
-    void start()
+    void start(int argc, char** argv)
     { 
-      std::cout<<"initiating map mux."<<std::endl;
-      //negative so it will not equal to any map number
-      current_map_number = -1;
+      map_request_sub = node->subscribe("/map_request", 100, &MapMux::map_request_cb, this);
 
-      yaml_file_path = "/media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/map_mux/config/example_environment.yaml";
-      if (node->getParam("map_file", map_file))
-      { 
-        yaml_file_path = map_file;
-        std::cout<<"input path to yaml file: "<<yaml_file_path<<std::endl;
-      }
-      else
-      {
-        std::cout<<"no yaml file path specified. Defaulting to use"<<yaml_file_path<<std::endl;
-      }
-      
-      yaml_config = YAML::LoadFile(yaml_file_path);
-      
-      //vector of ros subscribers depending on number of levels/maps
+      map_change_svc = node->serviceClient<nav_msgs::LoadMap>("/tb3_0/change_map");
 
-      for(const auto levels : yaml_config)
-      {
-        std::string map_topic_name;
-        std::string topic_prefix = "multimap_server/maps";
-        std::string attrib_1 = "maps";
-        std::string attrib_2 = "routes";
-        
-        // map_path = levels.second[attrib_1].second[attrib_2];
-
-        map_topic_name += topic_prefix + "/" + levels.first.as<std::string>() + "/routes/map";
-
-        ros::Subscriber map_sub;
-        map_sub = node->subscribe(map_topic_name, 100, &MapMux::read_map_cb, this);
-        vector_map_sub.push_back(map_sub);
-      }
-    
-      map_request_sub = node->subscribe("map_request", 100, &MapMux::map_request_cb, this);
-      map_pub = node->advertise<nav_msgs::OccupancyGrid>("map", 10);
-    
     }
 
     void map_request_cb(const map_mux::MapRequest::ConstPtr& map_request)
-    {   
-        //do not publish again if the current map is the requested map
-        if (map_request->map_number == current_map_number)
-            std::cout<<"Already publishing desired map of map_number: "<<current_map_number<<std::endl;
-        else
-        { 
-          std::cout<<"publishing new map"<<std::endl;
-          current_map_number = map_request->map_number;
-          map_pub.publish(vector_maps[map_request->map_number]);
+    { 
+      bool map_exist = false;
+      std::string map_name = "/maps/" + map_request->level_name;
+      bool use_prefix = true;
+
+      if (node->getParam("/map_mux/use_prefix", use_prefix)){
+        std::string map_change_topic = "/" + map_request->robot_name + "/change_map";
+        map_change_svc = node->serviceClient<nav_msgs::LoadMap>(map_change_topic);
+      }
+      else
+      {
+        map_change_svc = node->serviceClient<nav_msgs::LoadMap>("/change_map");
+      }
+
+      std::string map_url = "";
+      if (node->getParam(map_name, map_url)){
+        ROS_INFO("Changing to : %s", map_name.c_str());
+        nav_msgs::LoadMap srv;
+        srv.request.map_url = map_url;
+
+        if (map_change_svc.call(srv))
+        {
+          node->setParam("/" + map_request->robot_name + "_free_fleet_client_node/level_name", map_request->level_name);
+          ROS_INFO("Response: %s", srv.response.result);
         }
-            
+        else{
+          ROS_INFO("Error at the map_svc Call back, no such service");
+        }
+      }
+      else{
+        ROS_INFO("No such param for map_name");
+      }
+
+      // if (map_request->level_name == "MBC_L9")
+      // {
+      //   ROS_INFO("Changing to MBC_L9");
+
+      //   nav_msgs::LoadMap srv;
+      //   srv.request.map_url = "/media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/adhoc_simulations/maps/mbc_L9.yaml";
+
+
+
+      //   if (map_change_svc.call(srv))
+      //   {
+      //     node->setParam("/tb3_0_free_fleet_client_node/level_name", "L9");
+      //     ROS_INFO("Response: %s", srv.response.result);
+      //   }
+      // }
+      // else if (map_request->level_name == "MBC_L10")
+      // {
+      //   ROS_INFO("Changing to MBC_L10");
+
+      //   nav_msgs::LoadMap srv;
+      //   srv.request.map_url = "/media/abilash/Ubuntu_Data1/ROS/adhoc_ws/src/adhoc_simulations/maps/mbc_L10.yaml";
+
+      //   if (map_change_svc.call(srv))
+      //   {
+      //     node->setParam("/tb3_0_free_fleet_client_node/level_name", "L10");
+      //     ROS_INFO("Response: %s", srv.response.result);
+      //   }
+      // }
+
+      std_srvs::Empty emptymsg;
+      ros::service::call("/tb3_0/move_base/clear_costmaps",emptymsg);
+
     }
 
-    void read_map_cb(const nav_msgs::OccupancyGrid::ConstPtr& map_msg)
-    {   
-        nav_msgs::OccupancyGrid map;
-        map.header = map_msg->header;
-        map.info = map_msg->info;
-        map.data = map_msg->data;
-        vector_maps.push_back(map);
-        std::cout<<"size of vector maps is now: "<<vector_maps.size()<<std::endl;
+    void get_map()
+    {
+      
     }
 
 
@@ -89,32 +110,31 @@ private:
     
     //subcribers
     ros::Subscriber map_request_sub;
-    std::vector<ros::Subscriber> vector_map_sub;
+    ros::ServiceClient map_change_svc;
 
     //publishers
     ros::Publisher map_pub;
-    std::vector<nav_msgs::OccupancyGrid> vector_maps;
+
+    std::vector<std::string> map_paths;
+    std::vector<std::string> level_names;
 
     //private attributes
-    std::string map_file;
+    std::string current_level;
     int current_map_number;
 
     //config file parameters
     std::string yaml_file_path;
     YAML::Node yaml_config;
-    std::string map_path;
+    
 
 };
 
 int main(int argc, char** argv)
 {   
-    std::cout<<"starting script"<<std::endl;
     ros::init(argc, argv,"map_mux");
     ros::NodeHandle node;
     MapMux mux = MapMux(&node);
-    std::cout<<"starting node"<<std::endl;
-    mux.start();
+    mux.start(argc, argv);
     ros::spin();
-    
-
+    return 0;
 }

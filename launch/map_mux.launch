@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="map_file" default="$(find map_mux)/config/example_environment.yaml"/>
 
 	<!-- Run the map mux-->
-	<node name="map_mux" pkg="map_mux" type="map_mux" args="$(arg map_file)"/>
+	<rosparam file="$(find map_mux)/config/config.yaml" command="load" />
+	<node name="map_mux" pkg="map_mux" type="map_mux" output="screen"/> 
+	
 
 </launch>
